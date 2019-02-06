@@ -1,34 +1,40 @@
 # TIG stack on hypriot (Raspbi 3)
 
-version: "3"
+version: "3.2"
 
 services:
  influxdb:
-   image: hypriot/rpi-influxdb:latest
+   image: hypriot/rpi-influxdb
+   container_name: influxdb
    volumes:
-    - /home/pirate/tig-docker/influxdb/data:/var/lib/influxdb
-    - /home/pirate/tig-docker/influxdb/config/:/etc/influxdb/
+    - ./influxdb/data:/var/lib/influxdb
+    - ./influxdb/config/:/etc/influxdb/
    ports:
    - "8082:8082"
    - "8086:8086"
    - "8089:8089"
-   restart: unless-stopped
+   restart: always
 
  telegraf:
-   image: arm32v7/telegraf:latest
+   image: arm32v7/telegraf
+   container_name: telegraf
    volumes: 
-   - /home/pirate/tig-docker/telegraf/:/etc/telegraf/
+   - ./telegraf/:/etc/telegraf/
    - /run/docker.sock:/var/run/docker.sock
    - /proc:/host/proc:ro
    environment:
    - HOST_PROC=/host/proc
    network_mode: "host"
-   restart: unless-stopped
+   restart: always
 
  grafana:
-   image: fg2it/grafana-armhf:v5.1.4
+   image: proxx/grafana-armv7
+   container_name: grafana
    ports:
    - "3000:3000"
+   volumes:
+   - ./grafana:/var/lib/grafana
+   user: "1000"
    links: 
    - influxdb
-   restart: unless-stopped
+   restart: always
